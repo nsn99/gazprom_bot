@@ -1,3 +1,23 @@
+# План оптимизации CI/CD пайплайна для Gazprom Trading Bot
+
+## Обзор
+
+Этот документ описывает план оптимизации существующего CI/CD пайплайна для улучшения производительности, сокращения времени сборки и развертывания.
+
+## Текущие проблемы
+
+1. **Последовательное выполнение задач** - увеличивает общее время сборки
+2. **Неоптимальное кэширование** - кэшируется только pip, но не Docker слои
+3. **Устаревшие версии Actions** - используются старые версии GitHub Actions
+4. **Избыточные операции** - установка зависимостей происходит несколько раз
+5. **Отсутствие параллелизма** - тесты, безопасность и сборка не могут выполняться параллельно
+6. **Неэффективная Docker сборка** - отсутствует многоэтапная сборка и оптимизация слоев
+
+## Оптимизированная конфигурация CI/CD
+
+### 1. Обновленный .github/workflows/ci.yml
+
+```yaml
 name: CI/CD Pipeline (Optimized)
 
 on:
@@ -155,7 +175,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: gazprom-bot
+        images: gazprom-trading-bot
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -166,7 +186,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./Dockerfile
+        file: ./Dockerfile.optimized
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
@@ -194,7 +214,7 @@ jobs:
           cd /opt/gazprom-bot
           
           # Создание резервной копии текущего контейнера
-          docker tag gazprom-bot:latest gazprom-bot:backup
+          docker tag gazprom-trading-bot:latest gazprom-trading-bot:backup
           
           # Плавное обновление с нулевым простоем
           docker-compose pull
@@ -205,13 +225,13 @@ jobs:
           if ! curl -f http://localhost:8000/health; then
             echo "Health check failed, rolling back..."
             docker-compose down
-            docker run -d --name gazprom-bot-backup gazprom-bot:backup
+            docker run -d --name gazprom-bot-backup gazprom-trading-bot:backup
             exit 1
           fi
           
           # Очистка
           docker system prune -f
-          docker rmi gazprom-bot:backup || true
+          docker rmi gazprom-trading-bot:backup || true
     
     - name: Run health check
       run: |
@@ -254,3 +274,169 @@ jobs:
           • Commit: ${{ github.sha }}
           • Branch: ${{ github.ref_name }}
           • Workflow: ${{ github.workflow }}
+```
+
+### 2. Оптимизированный Dockerfile
+
+```dockerfile
+# Gazprom Trading Bot - Оптимизированный Dockerfile с многоэтапной сборкой
+
+# Этап 1: Сборка зависимостей
+FROM python:3.11-slim as builder
+
+# Установка рабочих переменных
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Установка системных зависимостей для сборки
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Создание виртуального окружения
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Копирование и установка зависимостей
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Этап 2: Финальный образ
+FROM python:3.11-slim as runtime
+
+# Установка рабочих переменных
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/opt/venv/bin:$PATH"
+
+# Установка только необходимых системных зависимостей
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Копирование виртуального окружения из этапа сборки
+COPY --from=builder /opt/venv /opt/venv
+
+# Создание рабочей директории
+WORKDIR /app
+
+# Копирование исходного кода
+COPY . .
+
+# Создание директории для данных
+RUN mkdir -p /app/data /app/logs
+
+# Создание non-root пользователя
+RUN useradd --create-home --shell /bin/bash app && \
+    chown -R app:app /app
+USER app
+
+# Экспорт порта
+EXPOSE 8000
+
+# Оптимизированный health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+# Команда запуска
+CMD ["python", "run.py"]
+```
+
+### 3. Оптимизированный docker-compose.yml
+
+```yaml
+version: '3.8'
+
+services:
+  gazprom-bot:
+    build: 
+      context: .
+      dockerfile: Dockerfile.optimized
+      cache_from:
+        - gazprom-trading-bot:latest
+    container_name: gazprom-trading-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - gazprom-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  # Redis для кэширования (production)
+  redis:
+    image: redis:7-alpine
+    container_name: gazprom-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - gazprom-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+networks:
+  gazprom-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local
+  gazprom_data:
+    driver: local
+```
+
+## Ожидаемые улучшения производительности
+
+1. **Сокращение времени сборки на 40-60%** за счет:
+   - Параллельного выполнения тестов и проверки безопасности
+   - Улучшенного кэширования Docker слоев
+   - Многоэтапной сборки Docker
+
+2. **Уменьшение размера Docker образа на 30-40%** за счет:
+   - Многоэтапной сборки
+   - Удаления ненужных зависимостей
+   - Оптимизации слоев
+
+3. **Улучшение надежности развертывания** за счет:
+   - Zero-downtime развертывания
+   - Улучшенных health checks
+   - Автоматического отката при ошибках
+
+4. **Сокращение времени выполнения тестов** за счет:
+   - Параллельного запуска тестов
+   - Оптимизированного кэширования зависимостей
+   - Условного выполнения тестов
+
+## Следующие шаги
+
+1. Обновить Dockerfile с многоэтапной сборкой
+2. Обновить docker-compose.yml с оптимизациями
+3. Обновить .github/workflows/ci.yml с параллельным выполнением
+4. Настроить улучшенное кэширование
+5. Добавить условное выполнение задач
+6. Тестирование оптимизированного пайплайна
+7. Мониторинг производительности после внедрения

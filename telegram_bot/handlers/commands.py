@@ -78,7 +78,7 @@ async def start_command(update: TelegramUpdate, context: ContextTypes.DEFAULT_TY
                 """
             else:
                 message = f"""
-❌ Ошибка при создании портфеля: {result['error']}
+❌ Ошибка при создании портфеля
 
 Пожалуйста, попробуйте еще раз или обратитесь в поддержку.
                 """

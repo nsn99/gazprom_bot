@@ -17,7 +17,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dataclasses import dataclass, asdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from enum import Enum
 
@@ -26,7 +26,11 @@ try:
 except ImportError:
     requests = None
 
-from gazprom_bot.utils.time_utils import now_msk
+try:
+    from gazprom_bot.utils.time_utils import now_msk
+except ImportError:
+    # Fallback for when the module structure is different
+    from utils.time_utils import now_msk
 
 
 class AlertLevel(Enum):
