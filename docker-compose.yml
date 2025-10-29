@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  gazprom-bot:
+    build: .
+    container_name: gazprom-trading-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - gazprom-network
+
+  # Опционально: Redis для кэширования (в production)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: gazprom-redis
+  #   restart: unless-stopped
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - gazprom-network
+
+  # Опционально: PostgreSQL для production (вместо SQLite)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: gazprom-postgres
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: gazprom_bot
+  #     POSTGRES_USER: gazprom_user
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - gazprom-network
+
+networks:
+  gazprom-network:
+    driver: bridge
+
+volumes:
+  # redis_data:
+  # postgres_data:
+  gazprom_data:
+    driver: local
