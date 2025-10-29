@@ -109,7 +109,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v4
       with:
-        images: gazprom-bot
+        images: gazprom-trading-bot
         tags: |
           type=ref,event=branch
           type=ref,event=pr
