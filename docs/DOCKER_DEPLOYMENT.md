@@ -70,7 +70,7 @@ AI_MAX_TOKENS=1000
 
 ```bash
 # Клонирование репозитория
-git clone https://github.com/your-repo/gazprom-trading-bot.git
+git clone https://github.com/nsn99/gazprom_bot.git
 cd gazprom-trading-bot
 
 # Сборка Docker образа

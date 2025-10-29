@@ -11,7 +11,7 @@ Gazprom Trading Bot - это Telegram бот, который используе�
 ### 1. Клонирование и установка
 
 ```bash
-git clone https://github.com/your-repo/gazprom-trading-bot.git
+git clone https://github.com/nsn99/gazprom_bot.git
 cd gazprom-trading-bot
 python -m venv venv
 source venv/bin/activate  # Linux/Mac

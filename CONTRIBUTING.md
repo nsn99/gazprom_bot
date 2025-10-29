@@ -17,13 +17,13 @@
 1. **Fork репозитория**
    ```bash
    # Нажмите "Fork" на GitHub, затем клонируйте ваш fork
-   git clone https://github.com/your-username/gazprom-trading-bot.git
+   git clone https://github.com/nsn99/gazprom_bot.git
    cd gazprom-trading-bot
    ```
 
 2. **Настройка upstream**
    ```bash
-   git remote add upstream https://github.com/original-owner/gazprom-trading-bot.git
+   git remote add upstream https://github.com/nsn99/gazprom_bot.git
    ```
 
 3. **Создание виртуального окружения**

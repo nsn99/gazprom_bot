@@ -4,7 +4,7 @@
 
 Бот использует GPT-5 через AgentRouter API для анализа рынка и генерации торговых рекомендаций.
 
-[![CI/CD](https://github.com/your-repo/gazprom-trading-bot/workflows/ci/badge.svg)](https://github.com/your-repo/gazprom-trading-bot/actions)
+[![CI/CD](https://github.com/nsn99/gazprom_bot/workflows/ci/badge.svg)](https://github.com/nsn99/gazprom_bot/actions)
 [![Coverage](https://codecov.io/gh/your-repo/gazprom-trading-bot/branch/main/graph/badge.svg)](https://codecov.io/gh/your-repo/gazprom-trading-bot)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
@@ -76,7 +76,7 @@
 
 ```bash
 # 1. Клонирование репозитория
-git clone https://github.com/your-repo/gazprom-trading-bot.git
+git clone https://github.com/nsn99/gazprom_bot.git
 cd gazprom-trading-bot
 
 # 2. Создание виртуального окружения
@@ -100,7 +100,7 @@ python run.py
 #### Шаг 1: Клонирование репозитория
 
 ```bash
-git clone https://github.com/your-repo/gazprom-trading-bot.git
+git clone https://github.com/nsn99/gazprom_bot.git
 cd gazprom-trading-bot
 ```
 
@@ -483,7 +483,7 @@ A: Stop-Loss - автоматическая продажа при падении
 
 - **Telegram**: @gazprom_bot_support
 - **Email**: support@gazprom-bot.com
-- **GitHub Issues**: [Issues](https://github.com/your-repo/gazprom-trading-bot/issues)
+- **GitHub Issues**: [Issues](https://github.com/nsn99/gazprom_bot/issues)
 - **Документация**: [docs/](docs/)
 
 ### 🐛 Сообщения об ошибках

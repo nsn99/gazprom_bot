@@ -45,7 +45,7 @@ tests/
 
 1. **Клонирование репозитория**:
 ```bash
-git clone https://github.com/your-repo/gazprom-trading-bot.git
+git clone https://github.com/nsn99/gazprom_bot.git
 cd gazprom-trading-bot
 ```
 

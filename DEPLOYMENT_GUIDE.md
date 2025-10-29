@@ -74,7 +74,7 @@ graph TB
 
 ```bash
 # Клонирование репозитория
-git clone https://github.com/your-org/gazprom-trading-bot.git
+git clone https://github.com/nsn99/gazprom_bot.git
 cd gazprom-trading-bot
 
 # Создание виртуального окружения

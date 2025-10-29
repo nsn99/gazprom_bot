@@ -222,7 +222,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 ```bash
 # Клонирование репозитория
-git clone https://github.com/your-repo/gazprom-trading-bot.git
+git clone https://github.com/nsn99/gazprom_bot.git
 cd gazprom-trading-bot
 
 # Установка зависимостей

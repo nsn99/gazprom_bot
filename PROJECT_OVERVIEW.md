@@ -201,7 +201,7 @@ SYSTEM_PROMPT = """
 ### Локальная разработка
 
 ```bash
-git clone https://github.com/your-repo/gazprom-trading-bot.git
+git clone https://github.com/nsn99/gazprom_bot.git
 cd gazprom-trading-bot
 python -m venv venv
 source venv/bin/activate
